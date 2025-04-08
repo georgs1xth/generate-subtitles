@@ -26,7 +26,7 @@ conda activate WhisperX
 ```
 ### 2. Install PyTorch and etc.
 ```
-conda install pytorch==2.0.0 torchaudio==2.0.0 pytorch-cuda=11.8 -c pytorch -c nvidia
+conda install pytorch==2.0.0 torchaudio==2.0.0 pytorch-cuda=11.8 -c pytorch -c nvidia -y
 ```
 ### 3. Install Whisperx repo
 ```
@@ -40,6 +40,18 @@ npm install
 ```
 ### 5. Start the project (!IMPORTANT: Start it in conda environment)
 ```
+npm start
+```
+
+### Fast Install (Everything above, but in one copy paste)
+```
+conda create --name WhisperX python==3.10 -y
+conda activate WhisperX
+conda install pytorch==2.0.0 torchaudio==2.0.0 pytorch-cuda=11.8 -c pytorch -c nvidia -y
+pip install git+https://github.com/m-bain/whisperx.git
+git clone https://github.com/georgs1xth/generate-subtitles
+cd generate-subtitles
+npm install
 npm start
 ```
 
