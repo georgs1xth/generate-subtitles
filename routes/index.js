@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {forHumans, decrementBySecond} = require('../helpers/helpers')
-const { modelsArray, languagesArray } = require('../constants/constants');
+const { modelsArray, languagesArray, enginesArray } = require('../constants/constants');
 const fs = require('fs-extra')
 
 const l = console.log;
@@ -28,6 +28,7 @@ router.get('/', function (req, res, next) {
     isFreeSubtitles,
     uploadLimitInMB,
     modelsArray,
+    enginesArray,
     languagesArray,
     decrementBySecond
   });
@@ -64,6 +65,7 @@ router.get('/ytdlp', async function (req, res, next) {
     isFreeSubtitles,
     uploadLimitInMB,
     modelsArray,
+    enginesArray,
     languagesArray,
     decrementBySecond,
     ytdlp: true,

@@ -9,7 +9,7 @@ const { shouldTranslateFrom, languagesToTranscribe, translationLanguages, getLan
 const forHumans = require('../helpers/helpers').forHumans;
 const createTranslatedFiles = require('../translate/create-translated-files');
 const multipleGpusEnabled = process.env.MULTIPLE_GPUS === 'true';
-const { formatStdErr } = require('../helpers/formatStdErr')
+const { formatStdErr, formatStdErrX } = require('../helpers/formatStdErr')
 const { convertChineseTraditionalToSimplified, convertSerbianCyrillicToLatin } = require('../lib/convertText');
 const { stripOutTextAndTimestamps } = require('../translate/helpers')
 const { updateQueueItemStatus } = require('../queue/queue');
@@ -41,6 +41,9 @@ const isProd = nodeEnvironment === 'production';
 
 const whisperPath = which.sync('whisper')
 
+const whisperXPath = which.sync('whisperx');
+// const whisperXPath = 'whisperx';
+
 global.transcriptions = [];
 
 function sendToWebsocket (websocketConnection, data) {
@@ -66,6 +69,7 @@ async function transcribe ({
   downloadLink,
   // totalOutstanding, // not actually useful
   processNumber,
+  engine
 }) {
   return new Promise(async (resolve, reject) => {
 
@@ -131,8 +135,66 @@ async function transcribe ({
         fileDetails
       }), function () {});
 
+
+
+
+
+
+
+
+
+
       /** INSTANTIATE WHISPER PROCESS **/
       // queue up arguments, path is the first one
+
+
+
+
+      l(engine)
+      if (engine == 'whisperx')
+      {
+        l(engine)
+        l(whisperXPath);
+
+        const extension = originalFileNameWithExtension.split('.').pop();
+
+        let arguments = [`${path.resolve(__dirname, '../', uploadedFilePath)}`];
+
+        
+        // Initiate Args
+
+        const languageIsAutoDetect = language === 'auto-detect';
+
+        // don't pass a language to use auto-detect
+        if (!languageIsAutoDetect) {
+          arguments.push('--language', language);
+        }
+
+
+        // set the language for whisper (if undefined with auto-detect and translate off that)
+        if (model) {
+          arguments.push('--model', model);
+        }
+
+        arguments.push('-o', path.resolve(__dirname, '../', 'transcriptions', uploadGeneratedFilename));
+        arguments.push('--batch_size', 4);
+        arguments.push('--compute_type', 'float32');
+        arguments.push('--segment_resolution', 'sentence');
+        arguments.push('--verbose', 'False');
+        arguments.push('--print_progress', 'True');
+        arguments.push('--threads', 12);
+
+
+        var whisperProcess = spawn(whisperXPath, arguments);
+
+        l("\n\n\n\n\n\n")
+        l(whisperXPath, arguments.join(" "));
+        l("\n\n\n\n\n\n")
+
+      }
+      else
+      {
+        l(engine)
       let arguments = [uploadedFilePath];
 
       const languageIsAutoDetect = language === 'auto-detect';
@@ -166,7 +228,8 @@ async function transcribe ({
       l('transcribe arguments');
       l(arguments);
 
-      const whisperProcess = spawn(whisperPath, arguments);
+      var whisperProcess = spawn(whisperPath, arguments);
+      }
 
       // TODO: rename
       let serverNumber = processNumber
@@ -187,7 +250,11 @@ async function transcribe ({
       whisperProcess.stdout.on('data', data => {
         websocketConnection.send(JSON.stringify(`stdout: ${data}`), function () {});
         l(`STDOUT: ${data}`);
-
+        
+        // var formattedProgress = formatStdErrX(data.toString());
+        // l('\n\n\n\n\n');
+        // l(formattedProgress);
+        // l('\n\n\n\n\n');
         // TODO: pull this out into own function
         // check if language is autodetected)
         const dataAsString = data.toString();
@@ -217,29 +284,6 @@ async function transcribe ({
             fileDetails
           }), function () {});
         }
-      });
-
-      // log output from bash (it all comes through stderr for some reason?)
-      whisperProcess.stderr.on('data', data => {
-        const currentlyRunningJobs = amountOfRunningJobs();
-        const amountInQueue = global.newQueue.length
-        const totalOutstanding = currentlyRunningJobs + amountInQueue;
-
-        let outputString = `
-         STDERR: ${data},
-         Duration: ${uploadDurationInSecondsHumanReadable},
-         Model: ${model}, 
-         Language: ${displayLanguage},
-         Filename: ${directorySafeFileNameWithExtension}, 
-         Queue: ${totalOutstanding}, 
-         Translating: ${shouldTranslate}`;
-
-        outputString = outputString.replace(/\s+/g, ' ');
-        l(outputString);
-
-
-
-        // loop through and do with websockets
         for (let [, websocket] of global['webSocketData'].entries() ) {
           const websocketConnection = websocket.websocket;
           const clientWebsocketNumber = websocket.websocketNumber;
@@ -250,9 +294,10 @@ async function transcribe ({
             ownershipPerson = 'you'
           }
 
-          const formattedProgress = formatStdErr(data.toString());
-          // l('formattedProgress');
-          // l(formattedProgress);
+          var formattedProgress = formatStdOutX(data.toString());
+
+          l('formattedProgress');
+          l(formattedProgress);
 
           const { percentDoneAsNumber, percentDone, speed, timeRemaining  } = formattedProgress;
 
@@ -278,6 +323,75 @@ async function transcribe ({
             }));
           }
         }
+      });
+
+      // log output from bash (it all comes through stderr for some reason?)
+      whisperProcess.stderr.on('data', data => {
+        const currentlyRunningJobs = amountOfRunningJobs();
+        const amountInQueue = global.newQueue.length
+        const totalOutstanding = currentlyRunningJobs + amountInQueue;
+
+        let outputString = `
+         STDERR: ${data},
+         Duration: ${uploadDurationInSecondsHumanReadable},
+         Model: ${model}, 
+         Language: ${displayLanguage},
+         Filename: ${directorySafeFileNameWithExtension}, 
+         Queue: ${totalOutstanding}, 
+         Translating: ${shouldTranslate}`;
+
+        outputString = outputString.replace(/\s+/g, ' ');
+        l(outputString);
+
+
+
+        // loop through and do with websockets
+        // for (let [, websocket] of global['webSocketData'].entries() ) {
+        //   const websocketConnection = websocket.websocket;
+        //   const clientWebsocketNumber = websocket.websocketNumber;
+        //   const websocketFromProcess = websocketNumber;
+
+        //   let ownershipPerson = 'others'
+        //   if (clientWebsocketNumber === websocketFromProcess) {
+        //     ownershipPerson = 'you'
+        //   }
+
+        //   if(!whisperType)
+        //   {
+        //     var formattedProgress = formatStdErrX(data.toString());
+        //   }
+        //   else
+        //   {
+        //     var formattedProgress = formatStdErr(data.toString());
+        //   }
+
+        //   // l('formattedProgress');
+        //   // l(formattedProgress);
+
+        //   const { percentDoneAsNumber, percentDone, speed, timeRemaining  } = formattedProgress;
+
+        //   let processingString = '';
+        //   if (timeRemaining) {
+        //     processingString = `[${percentDone}] ${timeRemaining.string} Remaining, Speed ${speed}f/s`
+        //   }
+
+        //   // TODO: pull into function
+        //   // pass latest data to all the open sockets
+        //   if (websocketConnection.readyState === WebSocket.OPEN) {
+        //     /** websocketData message **/
+        //     websocketConnection.send(JSON.stringify({
+        //       message: 'websocketData',
+        //       processingData: processingString,
+        //       // processingData: data.toString(),
+        //       ownershipPerson,
+        //       serverNumber, // on the frontend we'll react different if it's on server 1 or two
+        //       formattedProgress,
+        //       percentDone: percentDoneAsNumber,
+        //       timeRemaining,
+        //       speed,
+        //     }));
+        //   }
+        // }
       });
 
 
@@ -509,3 +623,10 @@ async function transcribe ({
 }
 
 module.exports = transcribe;
+
+
+async function initiateWhisper ({
+
+}) {
+
+}

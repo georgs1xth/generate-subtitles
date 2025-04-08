@@ -10,7 +10,8 @@ router.get('/files', async function (req, res, next) {
 
     const keepMedia = req.query.keepMedia === 'true';
 
-    if (password !== process.env.FILES_PASSWORD) {
+    if (password !== process.env.FILES_PASSWORD && process.env.NODE_ENV != 'development'
+    ) {
       res.redirect('/404')
     } else {
       const dir = './transcriptions';

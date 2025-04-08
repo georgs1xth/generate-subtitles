@@ -51,6 +51,7 @@ router.post('/file', upload.single('file'), async function (req, res, next) {
 
     let language = req.body.language;
     let model = req.body.model;
+    let engine = req.body.engine
     const websocketNumber = req.body.websocketNumber;
     const shouldTranslate = req.body.shouldTranslate === 'true';
     const downloadLink = req.body.downloadLink;
@@ -69,6 +70,10 @@ router.post('/file', upload.single('file'), async function (req, res, next) {
     // make the model medium by default
     if (!model) {
       model = 'medium';
+    }
+
+    if (!engine) {
+      engine = 'whisperx';
     }
 
     if (model === 'tiny.en' || model === 'base.en' || model === 'small.en' || model === 'medium.en') {
@@ -219,6 +224,7 @@ router.post('/file', upload.single('file'), async function (req, res, next) {
       language,
       filename: originalFileNameWithExtension,
       ip,
+      engine,
       uploadDurationInSeconds,
       shouldTranslate,
       fileSizeInMB,
@@ -235,6 +241,7 @@ router.post('/file', upload.single('file'), async function (req, res, next) {
       uploadedFilePath,
       language,
       model,
+      engine,
       directorySafeFileNameWithoutExtension,
       directorySafeFileNameWithExtension,
       originalFileNameWithExtension,
@@ -288,7 +295,7 @@ router.get('/checkingOutstandingProcesses', async function (req, res, next) {
   l('outstandingJobsAmount');
   l(outstandingJobsAmount);
 
-  if (outstandingJobsAmount >= 3) {
+  if(outstandingJobsAmount >= 3) {
     res.send('tooMany');
   } else {
     res.send('ok');

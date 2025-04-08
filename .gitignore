@@ -11,7 +11,3 @@ public/javascripts/ffmpeg-core.wasm
 .env
 
 constants/apiTokens.txt
-
-api-transcriptions
-scripts/output-audio.aac
-scripts/trimmed.mp4

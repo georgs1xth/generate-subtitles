@@ -60,6 +60,47 @@ function formatStdErr (stdErrData) {
   }
 }
 
+function formatStdOutX(stdErrData) {
+  if (!stdErrData.includes('Progress:'))
+  {
+    return false;
+  }
+  // Initialize variables
+  let progressBar = '';
+  let percentDone = '';
+  let timeElapsed = '';
+  let speed = '';
+  let percentDoneAsNumber = '';
+  let timeRemainingString = '';
+  let hoursRemaining = '';
+  let minutesRemaining = '';
+  let secondsRemaining = '';
+
+  // Extract progress percentage
+  const progressMatch = stdErrData.match(/Progress:\s([\d.]+)%/);
+  if (progressMatch) {
+    percentDone = progressMatch[1] + '%';
+    percentDoneAsNumber = parseFloat(progressMatch[1]);
+  }
+
+  // Return formatted data
+  return {
+    progressBar,
+    percentDone,
+    timeElapsed,
+    speed,
+    percentDoneAsNumber,
+    timeRemaining: {
+      string: timeRemainingString,
+      hoursRemaining,
+      minutesRemaining,
+      secondsRemaining
+    },
+  };
+}
+
+
 module.exports = {
-  formatStdErr
+  formatStdErr,
+  formatStdOutX
 }

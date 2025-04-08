@@ -34,6 +34,11 @@ const modelsArray = [
   {name: 'Medium', value: 'medium'},
   {name: 'Large', value: 'large'},
 ];
+// Engine
+const enginesArray = [
+  {name: 'whisper (default)', value: 'whisper'},
+  {name: 'WhisperX (10x speed)', value: 'whisperx'}
+]
 
 // available models in Libretranslate
 const translationLanguages = [
@@ -136,5 +141,6 @@ module.exports = {
   allLanguages,
   modelsArray,
   languagesToTranslateTo,
-  whisperLanguagesHumanReadableArray
+  whisperLanguagesHumanReadableArray,
+  enginesArray
 }
