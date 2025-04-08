@@ -7,43 +7,43 @@ After trying to find another solution, [whisperx](https://github.com/m-bain/whis
 
 It was much faster than whisper(more than 10x). However I didn't like the idea of using command line and decided to fork generate-subtitles project, at the same time fixing it and empowering it with whisperx 
 
-# REQUIREMENTS
+## Requirements
 
 - Install FFmpeg
 - Install Nvidia CudNN
 - Install Nvidia dev CUDA Toolkit 
 
 
-# SETUP
+## Setup
 
 - Install Anaconda Navigator
 - Open anaconda prompt
 
-## 1. Create environment
+### 1. Create environment
 ```
-conda create --name WhisperX python==3.10
+conda create --name WhisperX python==3.10 -y
 conda activate WhisperX
 ```
-## 2. Install PyTorch and etc.
+### 2. Install PyTorch and etc.
 ```
 conda install pytorch==2.0.0 torchaudio==2.0.0 pytorch-cuda=11.8 -c pytorch -c nvidia
 ```
-## 3. Install Whisperx repo
+### 3. Install Whisperx repo
 ```
 pip install git+https://github.com/m-bain/whisperx.git
 ```
-## 4. Clone this repo and install dependecies
+### 4. Clone this repo and install dependecies
 ```
 git clone https://github.com/georgs1xth/generate-subtitles
 cd generate-subtitles
 npm install
 ```
-## 5. Start the project (!IMPORTANT: Start it in conda environment)
+### 5. Start the project (!IMPORTANT: Start it in conda environment)
 ```
 npm start
 ```
 
-# Credits
+## Credits
  - https://github.com/mayeaux/generate-subtitles
  - https://github.com/m-bain/whisperX
 
